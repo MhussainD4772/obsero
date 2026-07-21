@@ -1,7 +1,6 @@
 # Obsero
 
-> Temporary chaos README — real docs later.
-> 1200 embeds from 19 verified working GIF URLs (cycled). Size: 36px.
+
 
 <p align="center">
 
