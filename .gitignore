@@ -32,9 +32,14 @@ next-env.d.ts
 .DS_Store
 Thumbs.db
 .idea/
-.vscode/
 *.swp
 *.swo
+
+# Keep shared Cursor/VS Code workspace settings (format on save, etc.)
+# Ignore personal/local IDE junk if it appears later:
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 
 # Docker / local data
 *.log
