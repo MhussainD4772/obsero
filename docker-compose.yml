@@ -1,0 +1,41 @@
+services:
+ # service name = hostname other containers will use!!
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: obsero
+      POSTGRES_PASSWORD: obsero
+      POSTGRES_DB: obsero
+    ports:
+      - "5432:5432"  # host container - Mac browser tool -> localhost:5432 -> postgres container
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # named vloume: db files live outside the container file system
+
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      # Host backend/ → container /app (matches WORKDIR in Dockerfile)
+      - ./backend:/app
+    # Override Dockerfile CMD so code changes reload without rebuild
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      - postgres
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      # Preserve Linux node_modules from the image; don't let Mac mount overwrite them
+      - /app/node_modules
+    environment:
+      # Optional but useful: Next picks up file changes more reliably in Docker on Mac
+      - WATCHPACK_POLLING=true
+
+
+# Top-level volumes block declares named volumes used above
+volumes:
+  postgres_data:

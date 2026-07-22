@@ -1,0 +1,53 @@
+{
+  "editor.formatOnSave": true,
+  "editor.formatOnSaveMode": "file",
+
+  // Prettier is installed in frontend/ — point the extension at it from the monorepo root
+  "prettier.prettierPath": "${workspaceFolder}/frontend/node_modules/prettier",
+  "prettier.configPath": "${workspaceFolder}/frontend/.prettierrc.json",
+  "prettier.documentSelectors": [
+    "**/*.{js,jsx,ts,tsx,json,css,md,mjs,cjs}"
+  ],
+
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.ruff": "always",
+      "source.organizeImports.ruff": "always"
+    }
+  },
+
+  "ruff.enable": true,
+  "ruff.nativeServer": "on",
+  "ruff.configuration": "${workspaceFolder}/backend/ruff.toml"
+}

@@ -1,0 +1,9 @@
+# Ruff: linter + formatter for Python (fast; replaces Black+isort for most cases)
+
+[format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+
+[lint]
+select = ["E", "F", "I"]
