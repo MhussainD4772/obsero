@@ -47,6 +47,8 @@
     }
   },
 
+  "python.defaultInterpreterPath": "${workspaceFolder}/backend/.venv/bin/python",
+
   "ruff.enable": true,
   "ruff.nativeServer": "on",
   "ruff.configuration": "${workspaceFolder}/backend/ruff.toml"
