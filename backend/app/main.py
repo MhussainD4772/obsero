@@ -1,7 +1,24 @@
-from fastapi import FastAPI
+from contextlib import asynccontextmanager
 
-# uvicorn will load this as app.main:app
-app = FastAPI(title="Obsero API")
+from fastapi import FastAPI
+from sqlalchemy import text
+
+from app.db import engine
+from app.models import Base
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: touch DB (fails loudly if down) + create tables
+    async with engine.begin() as conn:
+        await conn.execute(text("SELECT 1"))  # connectivity check
+        await conn.run_sync(Base.metadata.create_all)
+    yield
+    # Shutdown: dispose connection pool
+    await engine.dispose()
+
+
+app = FastAPI(title="Obsero API", lifespan=lifespan)
 
 
 @app.get("/health")

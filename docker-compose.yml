@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: obsero
       POSTGRES_DB: obsero
     ports:
-      - "5432:5432"  # host container - Mac browser tool -> localhost:5432 -> postgres container
+      - "5433:5432"  # host 5433 → container 5432 (avoids local Postgres on 5432)
     volumes:
       - postgres_data:/var/lib/postgresql/data # named vloume: db files live outside the container file system
 
@@ -15,6 +15,8 @@ services:
     build: ./backend
     ports:
       - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://obsero:obsero@postgres:5432/obsero
     volumes:
       # Host backend/ → container /app (matches WORKDIR in Dockerfile)
       - ./backend:/app

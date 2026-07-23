@@ -12,10 +12,11 @@ When you release, rename that block to the version + date and start a fresh `[Un
 
 - Monorepo Docker Compose scaffold: Postgres, FastAPI `/health`, Next.js (OB-1)
 - GitHub Actions CI: frontend lint/format/types + backend ruff
+- Async SQLAlchemy + `events` table; app creates schema on startup (OB-2)
 
 ### Changed
 
-- _what behavior or API shifted_
+- Postgres host port mapped to `5433` to avoid clash with local Postgres on `5432`
 
 ### Fixed
 
