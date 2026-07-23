@@ -1,7 +1,7 @@
 # Sprint 01
 
 **Dates:** 2026-07-21 → _end_  
-**Goal:** Stand up the monorepo + Docker Compose spine (OB-1)
+**Goal:** Stand up monorepo + Compose (OB-1), then wire Postgres + events table (OB-2)
 
 ---
 
@@ -27,6 +27,32 @@ _Fill in — e.g. Compose YAML indentation, port 3000 already allocated, fronten
 ### What I learned
 
 _Fill in — one or two concrete takeaways (service DNS vs localhost, anonymous volume for node_modules, etc.)._
+
+---
+
+## Ticket: OB-2 — FastAPI: DB connection + events table
+
+### What I built
+
+- Backend deps: SQLAlchemy asyncio, asyncpg, pydantic-settings
+- `app/db.py` — async engine, session factory, `get_db`, `DATABASE_URL`
+- `app/models.py` — `Event` ORM model (`id`, `name`, `payload` JSONB, `created_at`)
+- `app/schemas.py` — Pydantic `EventCreate` / `EventRead`
+- Startup lifespan: `SELECT 1` + `create_all` (fail loudly if DB down)
+- Compose: `DATABASE_URL` env; host Postgres published on **5433** (avoids local Postgres on 5432)
+- Local `backend/.venv` + VS Code interpreter path for IDE imports
+
+### Why (key decisions)
+
+_Fill in — e.g. create_all vs Alembic for now; why host port 5433; async SQLAlchemy._
+
+### What fought me
+
+_Fill in — e.g. Pylance “sqlalchemy could not be resolved”, TablePlus hitting local Postgres on 5432, leftover applications_tracker on 5433._
+
+### What I learned
+
+_Fill in — service DNS vs localhost for DB tools; roles/ports; lifespan startup._
 
 ---
 
