@@ -13,6 +13,7 @@ When you release, rename that block to the version + date and start a fresh `[Un
 - Monorepo Docker Compose scaffold: Postgres, FastAPI `/health`, Next.js (OB-1)
 - GitHub Actions CI: frontend lint/format/types + backend ruff
 - Async SQLAlchemy + `events` table; app creates schema on startup (OB-2)
+- `POST /events` and `GET /events` (newest first) (OB-3)
 
 ### Changed
 
