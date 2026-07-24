@@ -1,7 +1,7 @@
 # Sprint 01
 
 **Dates:** 2026-07-21 → _end_  
-**Goal:** Stand up monorepo + Compose (OB-1), then wire Postgres + events table (OB-2)
+**Goal:** Compose spine (OB-1), DB + events table (OB-2), events HTTP API (OB-3)
 
 ---
 
@@ -53,6 +53,28 @@ _Fill in — e.g. Pylance “sqlalchemy could not be resolved”, TablePlus hitt
 ### What I learned
 
 _Fill in — service DNS vs localhost for DB tools; roles/ports; lifespan startup._
+
+---
+
+## Ticket: OB-3 — FastAPI: POST /events and GET /events
+
+### What I built
+
+- `POST /events` — body `EventCreate`, insert via `get_db`, return `EventRead` with `201`
+- `GET /events` — list all events, newest first (`created_at.desc()`)
+- Verified with curl: POST creates row with `id` + `created_at`; GET returns JSON array
+
+### Why (key decisions)
+
+_Fill in — e.g. Depends(get_db), response_model, 201 vs 200, order newest-first._
+
+### What fought me
+
+_Fill in — anything that slowed you down on this ticket._
+
+### What I learned
+
+_Fill in — commit/refresh, Pydantic ↔ ORM, select/order_by._
 
 ---
 
