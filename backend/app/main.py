@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -21,6 +22,15 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Obsero API", lifespan=lifespan)
+
+# Browser on :3000 → API on :8000 is cross-origin; curl/SDK never need this.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/health")
