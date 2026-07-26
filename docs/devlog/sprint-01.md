@@ -1,7 +1,7 @@
 # Sprint 01
 
 **Dates:** 2026-07-21 → _end_  
-**Goal:** Compose spine (OB-1), DB + events table (OB-2), events HTTP API (OB-3)
+**Goal:** Compose spine (OB-1), DB + events table (OB-2), events HTTP API (OB-3), minimal Python SDK (OB-4)
 
 ---
 
@@ -75,6 +75,30 @@ _Fill in — anything that slowed you down on this ticket._
 ### What I learned
 
 _Fill in — commit/refresh, Pydantic ↔ ORM, select/order_by._
+
+---
+
+## Ticket: OB-4 — SDK: minimal obsero package
+
+### What I built
+
+- Installable package under `sdk/` (`pyproject.toml` + `src/obsero/` hatchling layout)
+- `pip install -e ./sdk` → `import obsero`
+- `obsero.init()` / env `OBSERO_BASE_URL` (default `http://localhost:8000`)
+- `obsero.track(name, payload)` POSTs to `/events` via httpx; returns created event JSON
+- Verified: track creates a visible row (`id`, `name`, `payload`, `created_at`)
+
+### Why (key decisions)
+
+_Fill in — e.g. src layout vs flat; httpx; init + env vs env-only; module-level base URL._
+
+### What fought me
+
+_Fill in — e.g. duplicate TOML dependencies keys, unsaved client.py on disk, zsh quoting / no bare `python` without venv._
+
+### What I learned
+
+_Fill in — editable installs, package exports in `__init__`, client vs API contract._
 
 ---
 
