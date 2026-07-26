@@ -15,6 +15,7 @@ When you release, rename that block to the version + date and start a fresh `[Un
 - Async SQLAlchemy + `events` table; app creates schema on startup (OB-2)
 - `POST /events` and `GET /events` (newest first) (OB-3)
 - Installable Python SDK: `obsero.track()` → `POST /events`; configurable base URL (OB-4)
+- Next.js events list (TanStack Query) + FastAPI CORS for `localhost:3000` (OB-5)
 
 ### Changed
 
@@ -22,7 +23,7 @@ When you release, rename that block to the version + date and start a fresh `[Un
 
 ### Fixed
 
-- _what broke and got repaired_
+- Events list Refresh ignored updates when the browser cached `GET /events` (OB-5)
 
 <!--
 ## [0.1.0] - YYYY-MM-DD
