@@ -14,6 +14,7 @@ When you release, rename that block to the version + date and start a fresh `[Un
 - GitHub Actions CI: frontend lint/format/types + backend ruff
 - Async SQLAlchemy + `events` table; app creates schema on startup (OB-2)
 - `POST /events` and `GET /events` (newest first) (OB-3)
+- Installable Python SDK: `obsero.track()` → `POST /events`; configurable base URL (OB-4)
 
 ### Changed
 
