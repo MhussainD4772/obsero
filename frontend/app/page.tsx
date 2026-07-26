@@ -1,49 +1,22 @@
-const FUN_GIFS = [
-  "https://i.giphy.com/media/JIX9t2j0ZTN9S/200.gif",
-  "https://i.giphy.com/media/5VKbvrjxpVJCM/200.gif",
-  "https://i.giphy.com/media/3o7aCTPPm4OHfRLSH6/200.gif",
-  "https://i.giphy.com/media/l0MYt5jPR6QX5pnqM/200.gif",
-  "https://i.giphy.com/media/3oEjI6SIIHBdRxXI40/200.gif",
-  "https://i.giphy.com/media/l0MYC0LajbaPoEADu/200.gif",
-] as const;
+import { EventsTable } from "@/components/events-table";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-zinc-950 px-6 py-16 text-zinc-100">
-      <main className="mx-auto flex max-w-3xl flex-col items-center gap-8 text-center">
-        <p className="text-sm uppercase tracking-[0.2em] text-zinc-500">
-          temporary chaos mode
-        </p>
+    <div className="min-h-screen bg-neutral-100 px-4 py-8 text-black sm:px-8">
+      <main className="mx-auto max-w-5xl">
+        <header className="mb-0 border-2 border-b-0 border-black bg-neutral-100 p-4 shadow-[4px_4px_0_0_#000]">
+          <p className="font-mono text-xs font-bold uppercase tracking-tight">
+            Obsero · Sprint 01
+          </p>
+          <h1 className="mt-2 font-mono text-4xl font-bold uppercase tracking-tight sm:text-5xl">
+            Events
+          </h1>
+          <p className="mt-2 max-w-2xl font-mono text-sm">
+            Live rows from GET /events. Track with the SDK, then hit Refresh.
+          </p>
+        </header>
 
-        <h1 className="text-5xl font-bold tracking-tight sm:text-6xl">
-          Obsero
-        </h1>
-
-        <p className="max-w-xl text-lg text-zinc-400">
-          We observe LLM calls. You observe GIFs. Same energy, different stack.
-          Real traces come later for now, stare at these until the dashboard
-          exists.
-        </p>
-
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {FUN_GIFS.map((src) => (
-            // External GIFs — plain img is fine for this throwaway page
-            // (next/image would need remotePatterns in next.config)
-            // eslint-disable-next-line @next/next/no-img-element -- temporary GIF wall; replace in OB-6
-            <img
-              key={src}
-              src={src}
-              alt="silly gif"
-              width={200}
-              height={200}
-              className="h-40 w-full rounded-lg object-cover"
-            />
-          ))}
-        </div>
-
-        <p className="text-sm text-zinc-600">
-          /health is boring. This page is not. (Replace before v0.1.)
-        </p>
+        <EventsTable />
       </main>
     </div>
   );

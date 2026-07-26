@@ -1,7 +1,7 @@
 # Sprint 01
 
 **Dates:** 2026-07-21 → _end_  
-**Goal:** Compose spine (OB-1), DB + events table (OB-2), events HTTP API (OB-3), minimal Python SDK (OB-4)
+**Goal:** Compose spine (OB-1), DB + events table (OB-2), events HTTP API (OB-3), minimal Python SDK (OB-4), events list UI + CORS (OB-5)
 
 ---
 
@@ -99,6 +99,29 @@ _Fill in — e.g. duplicate TOML dependencies keys, unsaved client.py on disk, z
 ### What I learned
 
 _Fill in — editable installs, package exports in `__init__`, client vs API contract._
+
+---
+
+## Ticket: OB-5 — Next.js: events list page
+
+### What I built
+
+- FastAPI CORS middleware allowing `http://localhost:3000`
+- TanStack Query provider + `fetchEvents()` client (`cache: "no-store"`)
+- Brutalist off-white events table (name, payload, timestamp) with Refresh
+- Replaced temporary GIF home page; DoD: SDK `track()` → Refresh → new row
+
+### Why (key decisions)
+
+_Fill in — e.g. client fetch + TanStack vs server component; CORS origin lock; no-store cache._
+
+### What fought me
+
+_Fill in — e.g. browser caching GET /events making Refresh look broken._
+
+### What I learned
+
+_Fill in — CORS vs curl/SDK, QueryClientProvider, refetch vs cache._
 
 ---
 
