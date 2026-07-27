@@ -20,8 +20,8 @@ services:
     volumes:
       # Host backend/ → container /app (matches WORKDIR in Dockerfile)
       - ./backend:/app
-    # Override Dockerfile CMD so code changes reload without rebuild
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    # Migrate then serve (entrypoint is bind-mounted from ./backend)
+    command: ["sh", "entrypoint.sh"]
     depends_on:
       - postgres
 

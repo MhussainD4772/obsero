@@ -6,18 +6,16 @@ from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import engine, get_db
-from app.models import Base, Event
+from app.models import Event
 from app.schemas import EventCreate, EventRead
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: touch DB (fails loudly if down) + create tables
+    # Startup: connectivity only — schema comes from Alembic migrations
     async with engine.begin() as conn:
-        await conn.execute(text("SELECT 1"))  # connectivity check
-        await conn.run_sync(Base.metadata.create_all)
+        await conn.execute(text("SELECT 1"))
     yield
-    # Shutdown: dispose connection pool
     await engine.dispose()
 
 
