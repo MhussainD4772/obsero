@@ -1,3 +1,9 @@
+"""Obsero FastAPI app — health + events ingest/list.
+
+Schema is owned by Alembic (see migrations/). This module only checks
+DB connectivity on startup and exposes HTTP endpoints.
+"""
+
 from contextlib import asynccontextmanager
 
 from fastapi import Depends, FastAPI
@@ -41,7 +47,21 @@ async def create_event(
     body: EventCreate,
     db: AsyncSession = Depends(get_db),
 ):
-    event = Event(name=body.name, payload=body.payload)
+    # Pass through all fields (LLM ones may be None for generic track() calls)
+    event = Event(
+        name=body.name,
+        payload=body.payload,
+        provider=body.provider,
+        model=body.model,
+        input=body.input,
+        output=body.output,
+        prompt_tokens=body.prompt_tokens,
+        completion_tokens=body.completion_tokens,
+        total_tokens=body.total_tokens,
+        latency_ms=body.latency_ms,
+        cost_usd=body.cost_usd,
+        status=body.status,
+    )
     db.add(event)
     await db.commit()
     await db.refresh(event)  # pull id + created_at from Postgres
