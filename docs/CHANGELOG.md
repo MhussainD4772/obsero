@@ -16,10 +16,12 @@ When you release, rename that block to the version + date and start a fresh `[Un
 - `POST /events` and `GET /events` (newest first) (OB-3)
 - Installable Python SDK: `obsero.track()` → `POST /events`; configurable base URL (OB-4)
 - Next.js events list (TanStack Query) + FastAPI CORS for `localhost:3000` (OB-5)
+- Alembic migrations for schema; initial `events` revision (OB-6)
 
 ### Changed
 
 - Postgres host port mapped to `5433` to avoid clash with local Postgres on `5432`
+- App startup no longer calls `create_all`; schema applied via `alembic upgrade head` (OB-6)
 
 ### Fixed
 

@@ -1,7 +1,7 @@
 # Sprint 01
 
 **Dates:** 2026-07-21 → _end_  
-**Goal:** Compose spine (OB-1), DB + events table (OB-2), events HTTP API (OB-3), minimal Python SDK (OB-4), events list UI + CORS (OB-5)
+**Goal:** Compose spine (OB-1), DB + events table (OB-2), events HTTP API (OB-3), minimal Python SDK (OB-4), events list UI + CORS (OB-5), Alembic schema ownership (OB-6)
 
 ---
 
@@ -122,6 +122,30 @@ _Fill in — e.g. browser caching GET /events making Refresh look broken._
 ### What I learned
 
 _Fill in — CORS vs curl/SDK, QueryClientProvider, refetch vs cache._
+
+---
+
+## Ticket: OB-6 — Introduce Alembic and take over schema management
+
+### What I built
+
+- Alembic (async) under `backend/migrations/` + `alembic.ini`
+- Initial revision `0001_create_events` matching the current `events` table
+- Removed `create_all` from app lifespan; kept `SELECT 1` connectivity check
+- `entrypoint.sh` runs `alembic upgrade head` before Uvicorn; Compose uses it
+- Verified: fresh DB + `upgrade head` produces the expected `events` schema
+
+### Why (key decisions)
+
+_Fill in — e.g. why migrations folder not named alembic/; stamp vs upgrade on existing DB; migrate in entrypoint vs manual only._
+
+### What fought me
+
+_Fill in — e.g. local `alembic/` package shadow, Docker rebuild stuck, stamp for create_all-era DBs._
+
+### What I learned
+
+_Fill in — alembic_version, upgrade vs stamp, create_all cannot alter tables._
 
 ---
 
