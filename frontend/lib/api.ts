@@ -7,6 +7,17 @@ export type Event = {
   name: string;
   payload: Record<string, unknown>;
   created_at: string;
+  // LLM fields — null on old Sprint 1 rows (OB-7); UI columns come in OB-10
+  provider?: string | null;
+  model?: string | null;
+  input?: Record<string, unknown> | null;
+  output?: Record<string, unknown> | null;
+  prompt_tokens?: number | null;
+  completion_tokens?: number | null;
+  total_tokens?: number | null;
+  latency_ms?: number | null;
+  cost_usd?: string | null; // Decimal serializes as string in JSON
+  status?: string | null;
 };
 
 export async function fetchEvents(): Promise<Event[]> {

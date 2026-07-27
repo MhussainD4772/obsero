@@ -1,7 +1,7 @@
 # Sprint 01
 
 **Dates:** 2026-07-21 → _end_  
-**Goal:** Compose spine (OB-1), DB + events table (OB-2), events HTTP API (OB-3), minimal Python SDK (OB-4), events list UI + CORS (OB-5), Alembic schema ownership (OB-6)
+**Goal:** … Alembic schema ownership (OB-6), LLM fields on events (OB-7)
 
 ---
 
@@ -146,6 +146,30 @@ _Fill in — e.g. local `alembic/` package shadow, Docker rebuild stuck, stamp f
 ### What I learned
 
 _Fill in — alembic_version, upgrade vs stamp, create_all cannot alter tables._
+
+---
+
+## Ticket: OB-7 — Extend the data model to a real LLM call
+
+### What I built
+
+- Nullable LLM columns on `Event` ORM: provider, model, input/output JSONB, token counts, latency_ms, cost_usd (Numeric), status
+- Alembic revision `0002_add_llm_fields_to_events` (autogenerate via Docker; renamed from hash id)
+- `EventCreate` / `EventRead` extended; `POST /events` persists all fields; `GET` returns them
+- Old Sprint 1 rows survive (null LLM fields); full LLM POST round-trip verified
+- Frontend `Event` type updated with optional LLM fields (UI columns deferred to OB-10)
+
+### Why (key decisions)
+
+_Fill in — nullable columns for backward compat; Numeric for cost; keep payload alongside input/output._
+
+### What fought me
+
+_Fill in — SQLAlchemy 3.14 host venv vs Docker 3.11 for autogenerate; run alembic in container._
+
+### What I learned
+
+_Fill in — first additive migration after OB-6; API schema optional fields vs DB nullable._
 
 ---
 
