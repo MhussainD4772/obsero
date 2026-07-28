@@ -1,7 +1,7 @@
 # Sprint 01
 
 **Dates:** 2026-07-21 → _end_  
-**Goal:** … Alembic schema ownership (OB-6), LLM fields on events (OB-7)
+**Goal:** … LLM fields on events (OB-7), SDK Gemini capture via context manager (OB-8)
 
 ---
 
@@ -170,6 +170,30 @@ _Fill in — SQLAlchemy 3.14 host venv vs Docker 3.11 for autogenerate; run alem
 ### What I learned
 
 _Fill in — first additive migration after OB-6; API schema optional fields vs DB nullable._
+
+---
+
+## Ticket: OB-8 — SDK: capture a real LLM call (Gemini)
+
+### What I built
+
+- ADR 0002: context manager over decorator; Gemini (free tier) as first real provider
+- `track()` accepts optional LLM fields (provider, model, tokens, latency, etc.)
+- `obsero.trace` context manager: `perf_counter` latency, `set_output` / `set_usage`, ships via `track()`
+- `google-genai` dependency; example `sdk/examples/gemini_chat.py` (model `gemini-flash-latest`)
+- Verified: real Gemini call → row with prompt/completion/total tokens + latency_ms
+
+### Why (key decisions)
+
+_Fill in — context manager vs decorator; Gemini vs OpenAI for learning cost; gemini-flash-latest alias._
+
+### What fought me
+
+_Fill in — 429/404 on retired model ids; list models for the key; remember to source .env._
+
+### What I learned
+
+_Fill in — usage_metadata; perf_counter; provider default is overrideable._
 
 ---
 

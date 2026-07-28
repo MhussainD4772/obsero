@@ -18,6 +18,8 @@ When you release, rename that block to the version + date and start a fresh `[Un
 - Next.js events list (TanStack Query) + FastAPI CORS for `localhost:3000` (OB-5)
 - Alembic migrations for schema; initial `events` revision (OB-6)
 - Nullable LLM fields on `events` + migration `0002`; POST/GET /events accept and return them (OB-7)
+- SDK `obsero.trace` context manager + Gemini example; `track()` sends LLM fields (OB-8)
+- ADR 0002: context manager for LLM instrumentation; Gemini first for free-tier learning (OB-8)
 
 ### Changed
 
