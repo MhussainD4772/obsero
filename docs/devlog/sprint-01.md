@@ -1,7 +1,7 @@
 # Sprint 01
 
 **Dates:** 2026-07-21 → _end_  
-**Goal:** … LLM fields on events (OB-7), SDK Gemini capture via context manager (OB-8)
+**Goal:** … SDK Gemini capture (OB-8), cost/batching/fail-safe SDK (OB-9)
 
 ---
 
@@ -195,6 +195,31 @@ _Fill in — 429/404 on retired model ids; list models for the key; remember to 
 ### What I learned
 
 _Fill in — usage_metadata; perf_counter; provider default is overrideable._
+
+---
+
+## Ticket: OB-9 — SDK: cost, batching, fail-safe
+
+### What I built
+
+- `pricing.py`: per-model $/1M table + FALLBACK; `estimate_cost()` → Decimal
+- `trace` wires `cost_usd` via `estimate_cost` (str for JSON)
+- `track()` buffers in memory; flush on size (10) or timer (2s); `atexit` + public `flush()`
+- Fail-safe: flush/network errors logged, never raise into host (DoD verified)
+- Backend `POST /events/batch` (`EventBatchCreate`, max 100)
+- `docs/future-work.md` seeded (pricing overrides, durable buffer, etc.)
+
+### Why (key decisions)
+
+_Fill in — local price table vs overrides; size+time flush; drop events on failed flush._
+
+### What fought me
+
+_Fill in — `python` missing without venv on fail-safe test._
+
+### What I learned
+
+_Fill in — SDK must not take down host; Decimal vs JSON; atexit last flush._
 
 ---
 

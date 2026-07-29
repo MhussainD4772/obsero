@@ -20,12 +20,17 @@ When you release, rename that block to the version + date and start a fresh `[Un
 - Nullable LLM fields on `events` + migration `0002`; POST/GET /events accept and return them (OB-7)
 - SDK `obsero.trace` context manager + Gemini example; `track()` sends LLM fields (OB-8)
 - ADR 0002: context manager for LLM instrumentation; Gemini first for free-tier learning (OB-8)
+- SDK pricing table + `estimate_cost`; `trace` fills `cost_usd` (OB-9)
+- SDK in-memory batch buffer (size/time flush) + fail-safe (never raises into host) (OB-9)
+- `POST /events/batch` batch ingest endpoint (OB-9)
+- `docs/future-work.md` parking lot for deferred post-v0 ideas
 
 ### Changed
 
 - Postgres host port mapped to `5433` to avoid clash with local Postgres on `5432`
 - App startup no longer calls `create_all`; schema applied via `alembic upgrade head` (OB-6)
 - Dashboard UI design system: clean dark mode (zinc-950) + `motion` for entrances
+- SDK `track()` buffers and flushes via `/events/batch` instead of one POST per call (OB-9)
 
 ### Fixed
 
