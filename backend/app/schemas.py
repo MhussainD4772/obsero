@@ -46,3 +46,7 @@ class EventRead(BaseModel):
     latency_ms: int | None = None
     cost_usd: Decimal | None = None
     status: str | None = None
+
+
+class EventBatchCreate(BaseModel):
+    events: list[EventCreate] = Field(min_length=1, max_length=100)

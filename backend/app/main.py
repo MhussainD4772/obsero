@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import engine, get_db
 from app.models import Event
-from app.schemas import EventCreate, EventRead
+from app.schemas import EventBatchCreate, EventCreate, EventRead
 
 
 @asynccontextmanager
@@ -74,3 +74,33 @@ async def list_events(
 ):
     result = await db.execute(select(Event).order_by(Event.created_at.desc()))
     return result.scalars().all()
+
+
+@app.post("/events/batch", response_model=list[EventRead], status_code=201)
+async def create_events_batch(
+    body: EventBatchCreate,
+    db: AsyncSession = Depends(get_db),
+):
+    """Insert many events in one request (SDK flush path)."""
+    rows: list[Event] = []
+    for item in body.events:
+        event = Event(
+            name=item.name,
+            payload=item.payload,
+            provider=item.provider,
+            model=item.model,
+            input=item.input,
+            output=item.output,
+            prompt_tokens=item.prompt_tokens,
+            completion_tokens=item.completion_tokens,
+            total_tokens=item.total_tokens,
+            latency_ms=item.latency_ms,
+            cost_usd=item.cost_usd,
+            status=item.status,
+        )
+        db.add(event)
+        rows.append(event)
+    await db.commit()
+    for event in rows:
+        await db.refresh(event)  # ids + created_at
+    return rows
