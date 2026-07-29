@@ -13,7 +13,9 @@ export default function Home() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.28, ease: "easeOut" }}
         >
-          <p className="text-sm font-medium text-zinc-500">Obsero · Sprint 01</p>
+          <p className="text-sm font-medium text-zinc-500">
+            Obsero · Sprint 01
+          </p>
           <h1 className="mt-1 text-3xl font-semibold tracking-tight text-zinc-50 sm:text-4xl">
             Events
           </h1>

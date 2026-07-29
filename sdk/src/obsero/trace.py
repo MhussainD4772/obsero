@@ -15,6 +15,7 @@ from types import TracebackType
 from typing import Any
 
 from obsero.client import track
+from obsero.pricing import estimate_cost
 
 
 class trace:
@@ -70,6 +71,11 @@ class trace:
         latency_ms = int((time.perf_counter() - self._start) * 1000)
         if exc is not None:
             self._status = "error"
+        cost = estimate_cost(
+            self.model,
+            self._prompt_tokens,
+            self._completion_tokens,
+        )
         track(
             self.name,
             provider=self.provider,
@@ -80,6 +86,7 @@ class trace:
             completion_tokens=self._completion_tokens,
             total_tokens=self._total_tokens,
             latency_ms=latency_ms,
+            cost_usd=str(cost) if cost is not None else None,
             status=self._status,
         )
         # return None → don't swallow the exception; host still sees it
