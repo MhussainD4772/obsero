@@ -25,6 +25,7 @@ When you release, rename that block to the version + date and start a fresh `[Un
 
 - Postgres host port mapped to `5433` to avoid clash with local Postgres on `5432`
 - App startup no longer calls `create_all`; schema applied via `alembic upgrade head` (OB-6)
+- Dashboard UI design system: clean dark mode (zinc-950) + `motion` for entrances
 
 ### Fixed
 

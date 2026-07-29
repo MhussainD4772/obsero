@@ -109,6 +109,7 @@ _Fill in — editable installs, package exports in `__init__`, client vs API con
 - FastAPI CORS middleware allowing `http://localhost:3000`
 - TanStack Query provider + `fetchEvents()` client (`cache: "no-store"`)
 - Brutalist off-white events table (name, payload, timestamp) with Refresh
+  _(UI later moved to clean dark mode — see CHANGELOG)_
 - Replaced temporary GIF home page; DoD: SDK `track()` → Refresh → new row
 
 ### Why (key decisions)
