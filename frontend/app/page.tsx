@@ -14,13 +14,14 @@ export default function Home() {
           transition={{ duration: 0.28, ease: "easeOut" }}
         >
           <p className="text-sm font-medium text-zinc-500">
-            Obsero · Sprint 01
+            Obsero 
           </p>
           <h1 className="mt-1 text-3xl font-semibold tracking-tight text-zinc-50 sm:text-4xl">
             Events
           </h1>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-zinc-400">
-            Live rows from GET /events. Track with the SDK, then refresh.
+            Live LLM rows from GET /events — model, tokens, latency, cost. Click
+            a row for input/output.
           </p>
         </motion.header>
 

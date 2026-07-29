@@ -7,7 +7,7 @@ export type Event = {
   name: string;
   payload: Record<string, unknown>;
   created_at: string;
-  // LLM fields — null on old Sprint 1 rows (OB-7); UI columns come in OB-10
+  // LLM fields — null on old Sprint 1 rows; dashboard columns in OB-10
   provider?: string | null;
   model?: string | null;
   input?: Record<string, unknown> | null;
