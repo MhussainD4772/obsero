@@ -2,44 +2,67 @@
 
 [![CI](https://github.com/MhussainD4772/obsero/actions/workflows/ci.yml/badge.svg)](https://github.com/MhussainD4772/obsero/actions/workflows/ci.yml)
 
-**Self-hostable observability for LLM applications.**
-
-Obsero captures prompts, responses, tokens, latency, and cost from your LLM calls, stores them in Postgres, and shows them in a dashboard — so you can see what your AI features are actually doing.
-
-> **Status:** early development. The ingest → store → dashboard path works today. Nested traces, analytics charts, evals, and multi-project auth are on the roadmap.
+**Open-source, self-hostable observability for LLM applications.**
 
 ---
 
-## Why Obsero?
+## What is Obsero?
 
-Building with LLMs without instrumentation is flying blind: slow prompts, surprise bills, and silent quality regressions after a model or prompt change.
+Obsero helps you see inside AI features in production and development.
 
-Obsero is built to be:
+When you ship a chatbot, agent, or any LLM-powered flow, most of the important work happens in black-box API calls. You don’t get a clear answer to:
 
-- **Self-hosted** — one Compose stack; your data stays yours
-- **SDK-first** — wrap existing calls; don’t rewrite your app
-- **Honest about cost** — token usage in, estimated USD out
-- **Fail-safe** — if the backend is down, your app keeps running
+- Which prompts are slow?
+- Which calls cost the most?
+- Did a model or prompt change silently hurt quality?
+
+Obsero closes that gap. You wrap your existing LLM calls with a small SDK. Obsero records what happened — prompt, response, model, tokens, latency, and cost — stores it on infrastructure you control, and shows it in a dashboard.
+
+Your data stays with you. No SaaS lock-in required.
 
 ---
 
-## What’s working now
+## How it works
 
-| Area | Capability |
-|------|------------|
-| **Ingest** | Python SDK `track()` and `trace` context manager |
-| **Providers** | Real Gemini capture example (OpenAI-shaped fields work the same path) |
-| **API** | `POST /events`, `POST /events/batch`, `GET /events` |
-| **Storage** | Postgres + Alembic migrations |
-| **Cost** | Per-model pricing table + fallback |
-| **SDK reliability** | In-memory batching, timed flush, never raises into the host |
-| **Dashboard** | Dark UI: model, tokens, latency, cost; expand row for input/output |
+```
+Your app
+   │
+   │  wrap LLM calls with the Obsero SDK
+   ▼
+Obsero backend (FastAPI)
+   │
+   ▼
+PostgreSQL
+   │
+   ▼
+Dashboard (Next.js)
+```
+
+1. **Instrument** — Install the Python SDK and wrap chat/completions (or use the `trace` helper around any provider).
+2. **Capture** — Each call ships prompt, response, tokens, latency, estimated cost, and model metadata.
+3. **Store** — The self-hosted API writes events to Postgres (single events or batched).
+4. **Inspect** — Open the dashboard to browse calls, costs, and latency, and expand a row for full input/output.
+
+If the Obsero backend is down, the SDK fails soft — your app keeps running.
+
+---
+
+## End goal
+
+Obsero aims to be the self-hosted control plane for LLM apps:
+
+| Pillar | Goal |
+|--------|------|
+| **Ingestion & tracing** | Reliable capture of LLM calls, including nested spans for multi-step agents |
+| **Analytics** | Cost and latency trends you can act on after every model or prompt change |
+| **Evaluation** | Datasets + LLM-as-judge so quality regressions show up before users do |
+| **Teams & auth** | Projects, access control, and one-command self-host for real teams |
+
+Today the foundation is live: ingest → store → dashboard for real LLM calls. The product roadmap is to grow that into full tracing, analytics, and evals — still open source, still self-hostable.
 
 ---
 
 ## Quick start
-
-### 1. Start the stack
 
 ```bash
 git clone https://github.com/MhussainD4772/obsero.git
@@ -49,131 +72,44 @@ docker compose up -d
 
 | Service | URL |
 |---------|-----|
-| API | http://localhost:8000/health |
-| Events | http://localhost:8000/events |
-| Postgres | `localhost:5433` (user/password/db: `obsero`) |
+| API health | http://localhost:8000/health |
+| Dashboard | http://localhost:3000 (`cd frontend && npm ci && npm run dev`) |
 
-### 2. Run the dashboard (local recommended)
-
-```bash
-cd frontend
-npm ci
-npm run dev
-```
-
-Open http://localhost:3000  
-
-> Prefer local `npm run dev` for the UI. Using Compose frontend and host Next against the same `frontend/` folder can conflict on the `.next` cache.
-
-### 3. Send an event (SDK)
+Send a test event:
 
 ```bash
-source backend/.venv/bin/activate   # or any venv
 pip install -e ./sdk
-
 python -c "import obsero; obsero.track('hello', {'ok': True})"
 ```
 
-Refresh the dashboard.
-
-### 4. Capture a real Gemini call (optional)
-
-```bash
-# .env at repo root: GEMINI_API_KEY=...
-set -a && source .env && set +a
-python sdk/examples/gemini_chat.py
-```
+Then refresh the dashboard.
 
 ---
 
-## Architecture
+## Stack
 
-```
-Your app
-  └─ obsero SDK (Python / httpx)
-        │  track / trace → buffer → POST /events/batch
-        ▼
-FastAPI  ──►  PostgreSQL
-        │
-        └── GET /events
-                ▼
-         Next.js dashboard
-```
-
-| Layer | Stack |
-|-------|--------|
+| Layer | Technology |
+|-------|------------|
 | SDK | Python, httpx |
 | Backend | FastAPI, async SQLAlchemy, Pydantic v2, Alembic |
 | Database | PostgreSQL |
-| Frontend | Next.js (App Router), TypeScript, Tailwind, TanStack Query |
-| Infra | Docker Compose |
+| Dashboard | Next.js, TypeScript, Tailwind, TanStack Query |
+| Deploy | Docker Compose |
 
 ---
 
-## Project layout
+## Open source
 
-```
-obsero/
-├── backend/          # FastAPI + Alembic
-├── frontend/         # Next.js dashboard
-├── sdk/              # Installable Python package (obsero)
-├── docs/             # Changelog, ADRs, devlog, future work
-└── docker-compose.yml
-```
+Obsero is open source. Anyone can use it, fork it, and contribute.
 
----
+- **Issues** — bugs, ideas, and discussion welcome  
+- **Pull requests** — fixes and features that move the product forward  
+- **Self-host** — run it on your own machines; no account required to start  
 
-## Documentation
-
-| Doc | Purpose |
-|-----|---------|
-| [docs/CHANGELOG.md](docs/CHANGELOG.md) | What shipped |
-| [docs/progress-sprint-01.md](docs/progress-sprint-01.md) | Sprint 01 wrap-up (OB-1 → OB-10) |
-| [docs/adr/](docs/adr/) | Architecture decisions |
-| [docs/devlog/](docs/devlog/) | Engineering journal |
-| [docs/future-work.md](docs/future-work.md) | Deferred / post-v0 ideas |
-
----
-
-## Development
-
-```bash
-# Backend checks (from CI)
-cd backend && ruff check . && ruff format --check .
-
-# Frontend checks (from CI)
-cd frontend && npm ci && npm run lint && npm run format:check && npx tsc --noEmit
-```
-
-PRs against `main` require green CI. Direct pushes to `main` are blocked.
-
----
-
-## Roadmap (toward v1.0)
-
-- [x] Ingest + list events
-- [x] LLM fields, cost estimate, batching, fail-safe SDK
-- [x] Dashboard LLM columns + expand
-- [ ] Nested-span tracing
-- [ ] Cost / latency analytics
-- [ ] Datasets + LLM-as-judge evals
-- [ ] Auth & projects
-- [ ] One-command self-host polish + tagged `v0.1` release
-
----
-
-## Contributing
-
-This is an early, ticket-driven project. Useful PRs:
-
-1. Fix bugs or docs in the current vertical slice
-2. Keep changes small and focused
-3. Match existing stack conventions (no drive-by framework swaps)
-
-Open an issue before large features.
+Large changes are easier to land if you open an issue first so we can align on direction. Keep PRs focused. Match the existing stack unless there’s a strong reason not to.
 
 ---
 
 ## License
 
-License not chosen yet. A `LICENSE` file will be added before the first tagged release.
+License will be published in a `LICENSE` file before the first tagged release. Until then, treat the repo as source-available for evaluation and contribution discussion.
