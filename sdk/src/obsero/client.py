@@ -1,9 +1,30 @@
+"""HTTP client for Obsero events.
+
+track() buffers in memory and flushes to POST /events/batch.
+Never raises into the host app.
+"""
+
+from __future__ import annotations
+
+import atexit
+import logging
 import os
+import threading
 from typing import Any
 
 import httpx
 
+_log = logging.getLogger("obsero")
+
 _base_url: str | None = None
+_buffer: list[dict[str, Any]] = []
+_lock = threading.Lock()
+_timer: threading.Timer | None = None
+
+# Flush when we hit this many events…
+_FLUSH_SIZE = 10
+# …or after this many seconds with anything pending
+_FLUSH_INTERVAL_S = 2.0
 
 
 def init(base_url: str | None = None) -> None:
@@ -16,9 +37,40 @@ def init(base_url: str | None = None) -> None:
 
 def _get_base_url() -> str:
     if _base_url is None:
-        init()  # lazy default on first use
+        init()
     assert _base_url is not None
     return _base_url
+
+
+def _schedule_flush() -> None:
+    """Ensure a timer will flush; reset if one was already running."""
+    global _timer
+    if _timer is not None:
+        _timer.cancel()
+    _timer = threading.Timer(_FLUSH_INTERVAL_S, flush)
+    _timer.daemon = True  # don't block process exit
+    _timer.start()
+
+
+def flush() -> None:
+    """Send buffered events as one batch. Safe to call anytime; never raises."""
+    global _timer
+    with _lock:
+        if _timer is not None:
+            _timer.cancel()
+            _timer = None
+        if not _buffer:
+            return
+        batch = list(_buffer)
+        _buffer.clear()
+
+    try:
+        url = f"{_get_base_url()}/events/batch"
+        with httpx.Client(timeout=10.0) as client:
+            response = client.post(url, json={"events": batch})
+            response.raise_for_status()
+    except Exception as exc:  # noqa: BLE001
+        _log.warning("flush failed (%d events dropped): %s", len(batch), exc)
 
 
 def track(
@@ -35,11 +87,9 @@ def track(
     latency_ms: int | None = None,
     cost_usd: float | str | None = None,
     status: str | None = None,
-) -> dict[str, Any]:
-    """POST an event to /events. Optional LLM fields match the OB-7 API."""
-    url = f"{_get_base_url()}/events"
+) -> None:
+    """Queue an event; flush on size or time. Never raises into the host."""
     body: dict[str, Any] = {"name": name, "payload": payload or {}}
-    # Only send keys that were set — keeps payloads small for legacy callers
     optional = {
         "provider": provider,
         "model": model,
@@ -53,7 +103,17 @@ def track(
         "status": status,
     }
     body.update({k: v for k, v in optional.items() if v is not None})
-    with httpx.Client(timeout=10.0) as client:
-        response = client.post(url, json=body)
-        response.raise_for_status()
-        return response.json()
+
+    should_flush = False
+    with _lock:
+        _buffer.append(body)
+        if len(_buffer) >= _FLUSH_SIZE:
+            should_flush = True
+        else:
+            _schedule_flush()
+
+    if should_flush:
+        flush()
+
+
+atexit.register(flush)  # last-chance ship on process exit
