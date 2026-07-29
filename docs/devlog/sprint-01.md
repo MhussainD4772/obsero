@@ -1,7 +1,7 @@
 # Sprint 01
 
 **Dates:** 2026-07-21 → _end_  
-**Goal:** … SDK Gemini capture (OB-8), cost/batching/fail-safe SDK (OB-9)
+**Goal:** … cost/batching/fail-safe SDK (OB-9), dashboard LLM columns + expand (OB-10)
 
 ---
 
@@ -220,6 +220,30 @@ _Fill in — `python` missing without venv on fail-safe test._
 ### What I learned
 
 _Fill in — SDK must not take down host; Decimal vs JSON; atexit last flush._
+
+---
+
+## Ticket: OB-10 — Dashboard: render real LLM call data
+
+### What I built
+
+- Events table columns: model, total tokens, latency, cost (USD via Intl); nulls → —
+- Click / keyboard expand row → input + output (payload when present)
+- Page copy updated; clean dark UI + light expand motion
+- Prettier workspace paths fixed (relative `frontend/` paths)
+- Compose: anonymous `/app/.next` volume so Docker cache doesn’t break host `npm run dev`
+
+### Why (key decisions)
+
+_Fill in — expand vs separate page; drop payload from main columns._
+
+### What fought me
+
+_Fill in — Turbopack `/app/.next` read-only after Docker bind-mount._
+
+### What I learned
+
+_Fill in — cost_usd string from JSON; null-safe formatters; Docker vs local Next cache._
 
 ---
 

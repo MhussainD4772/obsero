@@ -24,6 +24,7 @@ When you release, rename that block to the version + date and start a fresh `[Un
 - SDK in-memory batch buffer (size/time flush) + fail-safe (never raises into host) (OB-9)
 - `POST /events/batch` batch ingest endpoint (OB-9)
 - `docs/future-work.md` parking lot for deferred post-v0 ideas
+- Dashboard LLM columns (model, tokens, latency, cost) + expandable input/output (OB-10)
 
 ### Changed
 
@@ -31,10 +32,12 @@ When you release, rename that block to the version + date and start a fresh `[Un
 - App startup no longer calls `create_all`; schema applied via `alembic upgrade head` (OB-6)
 - Dashboard UI design system: clean dark mode (zinc-950) + `motion` for entrances
 - SDK `track()` buffers and flushes via `/events/batch` instead of one POST per call (OB-9)
+- Compose frontend: anonymous volume for `/app/.next` so Docker doesn’t poison host Next cache
 
 ### Fixed
 
 - Events list Refresh ignored updates when the browser cached `GET /events` (OB-5)
+- Prettier VS Code paths: use relative `frontend/` paths (`${workspaceFolder}` not expanded by extension)
 
 <!--
 ## [0.1.0] - YYYY-MM-DD

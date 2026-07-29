@@ -2,9 +2,11 @@
   "editor.formatOnSave": true,
   "editor.formatOnSaveMode": "file",
 
-  // Prettier is installed in frontend/ — point the extension at it from the monorepo root
-  "prettier.prettierPath": "${workspaceFolder}/frontend/node_modules/prettier",
-  "prettier.configPath": "${workspaceFolder}/frontend/.prettierrc.json",
+  // Prettier lives in frontend/. Use paths relative to the workspace root —
+  // the Prettier extension does NOT expand ${workspaceFolder} here (that
+  // produced …/obsero/${workspaceFolder}/frontend/… and broke config load).
+  "prettier.prettierPath": "frontend/node_modules/prettier",
+  "prettier.configPath": "frontend/.prettierrc.json",
   "prettier.documentSelectors": [
     "**/*.{js,jsx,ts,tsx,json,css,md,mjs,cjs}"
   ],
