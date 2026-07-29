@@ -22,6 +22,12 @@ entry here in the same session. After v0 / v1.0, mine this for tickets.
 
 ## Entries
 
+### 2026-07-28 — Split local vs Docker frontend workflows more cleanly
+- **Came up in:** chat (Turbopack `/app/.next` read-only panic)
+- **Idea:** Document “use Compose frontend OR local npm, not both on :3000”; maybe a `compose override` that omits frontend for local UI work.
+- **Why not now:** Anonymous `/app/.next` volume fixes the immediate cache poison; process docs can wait.
+- **Maybe later:** `docker-compose.override.example.yml` + README note.
+
 ### 2026-07-28 — Customer-owned pricing overrides
 - **Came up in:** OB-9 (pricing table discussion)
 - **Idea:** Let apps pass their own rates, e.g. `obsero.init(pricing={...})`, so models we don’t list still get correct cost.

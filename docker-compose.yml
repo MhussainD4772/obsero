@@ -33,6 +33,9 @@ services:
       - ./frontend:/app
       # Preserve Linux node_modules from the image; don't let Mac mount overwrite them
       - /app/node_modules
+      # Keep Turbopack/.next inside the container — a host .next written under
+      # Docker WORKDIR /app poisons local `npm run dev` (writes to /app/.next).
+      - /app/.next
     environment:
       # Optional but useful: Next picks up file changes more reliably in Docker on Mac
       - WATCHPACK_POLLING=true
