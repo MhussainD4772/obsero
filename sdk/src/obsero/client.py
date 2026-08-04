@@ -1,6 +1,6 @@
-"""HTTP client for Obsero events.
+"""HTTP client for Obsero events + nested traces.
 
-track() buffers in memory and flushes to POST /events/batch.
+track() → POST /events/batch; enqueue_trace() → POST /v1/traces.
 Never raises into the host app.
 """
 
@@ -18,12 +18,11 @@ _log = logging.getLogger("obsero")
 
 _base_url: str | None = None
 _buffer: list[dict[str, Any]] = []
+_trace_buffer: list[dict[str, Any]] = []
 _lock = threading.Lock()
 _timer: threading.Timer | None = None
 
-# Flush when we hit this many events…
 _FLUSH_SIZE = 10
-# …or after this many seconds with anything pending
 _FLUSH_INTERVAL_S = 2.0
 
 
@@ -48,29 +47,53 @@ def _schedule_flush() -> None:
     if _timer is not None:
         _timer.cancel()
     _timer = threading.Timer(_FLUSH_INTERVAL_S, flush)
-    _timer.daemon = True  # don't block process exit
+    _timer.daemon = True
     _timer.start()
 
 
 def flush() -> None:
-    """Send buffered events as one batch. Safe to call anytime; never raises."""
+    """Send buffered events and traces. Safe anytime; never raises."""
     global _timer
     with _lock:
         if _timer is not None:
             _timer.cancel()
             _timer = None
-        if not _buffer:
-            return
-        batch = list(_buffer)
+        events = list(_buffer)
+        traces = list(_trace_buffer)
         _buffer.clear()
+        _trace_buffer.clear()
 
-    try:
-        url = f"{_get_base_url()}/events/batch"
-        with httpx.Client(timeout=10.0) as client:
-            response = client.post(url, json={"events": batch})
-            response.raise_for_status()
-    except Exception as exc:  # noqa: BLE001
-        _log.warning("flush failed (%d events dropped): %s", len(batch), exc)
+    if events:
+        try:
+            url = f"{_get_base_url()}/events/batch"
+            with httpx.Client(timeout=10.0) as client:
+                response = client.post(url, json={"events": events})
+                response.raise_for_status()
+        except Exception as exc:  # noqa: BLE001
+            _log.warning("event flush failed (%d dropped): %s", len(events), exc)
+
+    # One POST per completed tree (matches POST /v1/traces contract)
+    for payload in traces:
+        try:
+            url = f"{_get_base_url()}/v1/traces"
+            with httpx.Client(timeout=10.0) as client:
+                response = client.post(url, json=payload)
+                response.raise_for_status()
+        except Exception as exc:  # noqa: BLE001
+            _log.warning("trace flush failed: %s", exc)
+
+
+def enqueue_trace(payload: dict[str, Any]) -> None:
+    """Queue a finished trace+spans payload; flush on size or timer."""
+    should_flush = False
+    with _lock:
+        _trace_buffer.append(payload)
+        if len(_trace_buffer) + len(_buffer) >= _FLUSH_SIZE:
+            should_flush = True
+        else:
+            _schedule_flush()
+    if should_flush:
+        flush()
 
 
 def track(
@@ -88,7 +111,7 @@ def track(
     cost_usd: float | str | None = None,
     status: str | None = None,
 ) -> None:
-    """Queue an event; flush on size or time. Never raises into the host."""
+    """Queue a flat event; flush on size or time. Never raises into the host."""
     body: dict[str, Any] = {"name": name, "payload": payload or {}}
     optional = {
         "provider": provider,
@@ -116,4 +139,4 @@ def track(
         flush()
 
 
-atexit.register(flush)  # last-chance ship on process exit
+atexit.register(flush)
