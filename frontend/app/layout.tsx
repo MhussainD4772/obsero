@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Obsero — Events",
-  description: "LLM observability events list",
+  title: "Obsero — Traces",
+  description: "LLM observability traces and events",
 };
 
 export default function RootLayout({
