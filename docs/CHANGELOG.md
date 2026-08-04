@@ -10,6 +10,9 @@ When you release, move that work into a versioned section and start a fresh `[Un
 
 ### Added
 
+- `traces` and `spans` tables (nested observability schema) via Alembic `0003` (OB-11)
+- ADR 0003: keep flat `events` alongside traces/spans for now (OB-11)
+
 ### Changed
 
 ### Fixed
