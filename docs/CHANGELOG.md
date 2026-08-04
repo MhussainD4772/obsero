@@ -12,6 +12,8 @@ When you release, move that work into a versioned section and start a fresh `[Un
 
 - `traces` and `spans` tables (nested observability schema) via Alembic `0003` (OB-11)
 - ADR 0003: keep flat `events` alongside traces/spans for now (OB-11)
+- `POST /v1/traces` nested ingest (client UUIDs, parent/cycle validation, atomic insert) (OB-12)
+- ADR 0004: nested ingest on `/v1/traces`, leave `/events/batch` alone (OB-12)
 
 ### Changed
 

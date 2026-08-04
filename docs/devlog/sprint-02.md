@@ -29,6 +29,29 @@ _Fill in — adjacency list; why `metadata` can’t be the Python attr name._
 
 ---
 
+## Ticket: OB-12 — Ingest API: accept a trace with nested spans
+
+### What I built
+
+- ADR 0004: new `POST /v1/traces` (not extending `/events/batch`)
+- Pydantic `TraceIngest`: client UUIDs; reject duplicate ids, missing parents, cycles
+- Endpoint inserts trace + spans in one transaction; response includes `span_count`
+- Spans inserted parent-before-child for self-FK safety
+
+### Why (key decisions)
+
+_Fill in — client UUIDs; why not extend batch; idempotency thoughts._
+
+### What fought me
+
+_Fill in —_
+
+### What I learned
+
+_Fill in — tree validation in Pydantic; transactional all-or-nothing._
+
+---
+
 ## Ticket: _next ticket key_
 
 ### What I built
