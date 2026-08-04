@@ -1,7 +1,7 @@
-"""Obsero SDK — track events to the Obsero backend."""
+"""Obsero SDK — flat events + nested traces/spans."""
 
 from obsero.client import flush, init, track
-from obsero.trace import trace
+from obsero.tracing import span, trace
 
-__version__ = "0.1.0"
-__all__ = ["flush", "init", "track", "trace", "__version__"]
+__version__ = "0.2.0"
+__all__ = ["flush", "init", "track", "trace", "span", "__version__"]

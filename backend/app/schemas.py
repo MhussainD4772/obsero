@@ -147,3 +147,67 @@ class TraceRead(BaseModel):
             created_at=trace.created_at,  # type: ignore[attr-defined]
             span_count=span_count,
         )
+
+
+# --- Query API (OB-14) ---
+
+
+class TraceListItem(BaseModel):
+    """One row in GET /v1/traces with roll-ups from spans."""
+
+    id: uuid.UUID
+    name: str
+    status: str | None = None
+    start_time: datetime | None = None
+    end_time: datetime | None = None
+    created_at: datetime
+    span_count: int
+    total_tokens: int | None = None
+    total_cost_usd: Decimal | None = None
+    # Prefer wall-clock duration when start/end set; else sum of span latency_ms
+    duration_ms: int | None = None
+
+
+class TraceListResponse(BaseModel):
+    items: list[TraceListItem]
+    total: int
+    limit: int
+    offset: int
+
+
+class SpanRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    trace_id: uuid.UUID
+    parent_span_id: uuid.UUID | None = None
+    name: str
+    provider: str | None = None
+    model: str | None = None
+    input: dict | None = None
+    output: dict | None = None
+    prompt_tokens: int | None = None
+    completion_tokens: int | None = None
+    total_tokens: int | None = None
+    latency_ms: int | None = None
+    cost_usd: Decimal | None = None
+    status: str | None = None
+    start_time: datetime | None = None
+    end_time: datetime | None = None
+
+
+class TraceDetail(BaseModel):
+    """GET /v1/traces/{id} — flat span list; client builds the tree (ADR 0005)."""
+
+    id: uuid.UUID
+    name: str
+    status: str | None = None
+    start_time: datetime | None = None
+    end_time: datetime | None = None
+    metadata: dict | None = None
+    created_at: datetime
+    span_count: int
+    total_tokens: int | None = None
+    total_cost_usd: Decimal | None = None
+    duration_ms: int | None = None
+    spans: list[SpanRead]

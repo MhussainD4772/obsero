@@ -98,25 +98,37 @@ set -a && source .env && set +a
 python sdk/examples/gemini_chat.py
 ```
 
-Uses `obsero.trace` and model `gemini-flash-latest`. The process flushes buffered events on exit. Refresh the UI and expand the row for input/output.
+Uses nested `obsero.trace` / `obsero.span` and model `gemini-flash-latest`.
+Flushes to `POST /v1/traces`. Refresh the UI — one trace row, click for the span tree.
+
+### 6. Optional — nested demo (no API key)
+
+```bash
+python sdk/examples/nested_trace_demo.py
+```
 
 ## How it works
 
-**In your app:** the Obsero SDK is a library. You call `track()` or wrap work in `trace(...)`. Events buffer in memory and flush to the API in batches (or on a timer / process exit). Network failures are logged; they do not raise into your app.
+**In your app:** wrap a run in `obsero.trace(...)` and steps in `obsero.span(...)`.
+Parent links use contextvars (async-safe). On exit the SDK POSTs the tree to
+`/v1/traces`. Flat `track()` still ships to `/events/batch`. Capture failures
+are logged; they do not raise into your app.
 
-**As a system you host:** Compose runs Postgres and FastAPI. The dashboard reads `GET /events` from the browser (CORS allows `http://localhost:3000`).
+**As a system you host:** Compose runs Postgres and FastAPI. The dashboard lists
+`GET /v1/traces` and detail at `/traces/[id]` (flat spans → client tree). Legacy
+events remain on the home page.
 
 ```
 Your application
       │
-      │  obsero.track / obsero.trace
+      │  obsero.trace / span  ·  obsero.track
       ▼
-Python SDK (httpx) ──POST /events/batch──► FastAPI
-                                              │
-                                              ▼
-                                         PostgreSQL
-                                              │
-Browser ◄──── GET /events ◄──────────────────┘
+Python SDK (httpx) ──POST /v1/traces──────────► FastAPI
+                   ──POST /events/batch───────►    │
+                                                   ▼
+                                              PostgreSQL
+                                                   │
+Browser ◄──── GET /v1/traces · /events ◄──────────┘
 (Next.js dashboard)
 ```
 

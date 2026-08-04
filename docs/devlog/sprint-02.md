@@ -52,20 +52,68 @@ _Fill in — tree validation in Pydantic; transactional all-or-nothing._
 
 ---
 
-## Ticket: _next ticket key_
+## Ticket: OB-13 — SDK: nested span capture
 
 ### What I built
 
-_Same headings as above — copy this block per ticket._
+- `obsero.trace` / `obsero.span` context managers with contextvars for parent stack
+- Client UUIDs; exception → span `status=error`, host exception still propagates
+- `enqueue_trace` + flush to `POST /v1/traces`; fail-safe logging
+- Examples: `nested_trace_demo.py`, updated `gemini_chat.py`
 
 ### Why (key decisions)
 
-_
+_Fill in — contextvars; rename old LLM-only trace._
 
 ### What fought me
 
-_
+_Fill in —_
 
 ### What I learned
 
-_
+_Fill in —_
+
+---
+
+## Ticket: OB-14 — Query API: trace list and detail
+
+### What I built
+
+- `GET /v1/traces` paginated list with SQL roll-ups (spans, tokens, cost, duration)
+- `GET /v1/traces/{id}` with flat span list
+- ADR 0005: flat vs nested response tradeoff
+
+### Why (key decisions)
+
+_Fill in — flat spans; offset pagination._
+
+### What fought me
+
+_Fill in —_
+
+### What I learned
+
+_Fill in —_
+
+---
+
+## Ticket: OB-15 — Dashboard: trace list and nested detail
+
+### What I built
+
+- Home: traces table (roll-ups) + retained events section
+- `/traces/[id]`: roll-up cards + indented span tree with I/O expand
+- Client `buildSpanTree` / `flattenSpanTree` from flat API
+
+### Why (key decisions)
+
+_Fill in —_
+
+### What fought me
+
+_Fill in —_
+
+### What I learned
+
+_Fill in —_
+

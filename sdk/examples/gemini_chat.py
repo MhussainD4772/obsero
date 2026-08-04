@@ -1,6 +1,6 @@
-"""DoD script: real Gemini call through obsero.trace → POST /events.
+"""Gemini call inside nested trace/span → POST /v1/traces.
 
-Requires GEMINI_API_KEY in the environment (e.g. source .env from repo root).
+Requires GEMINI_API_KEY (e.g. source .env from repo root).
 """
 
 import os
@@ -18,27 +18,29 @@ def main() -> None:
         raise SystemExit("Set GEMINI_API_KEY (e.g. set -a && source .env && set +a)")
 
     client = genai.Client(api_key=api_key)
+    obsero.init()
 
-    with obsero.trace(
-        name="gemini_chat",
-        model=MODEL,
-        provider="google",
-        input={"prompt": PROMPT},
-    ) as span:
-        response = client.models.generate_content(model=MODEL, contents=PROMPT)
-        text = response.text or ""
-        span.set_output({"text": text})
+    with obsero.trace("gemini_chat"):
+        with obsero.span(
+            "generate",
+            model=MODEL,
+            provider="google",
+            input={"prompt": PROMPT},
+        ) as s:
+            response = client.models.generate_content(model=MODEL, contents=PROMPT)
+            text = response.text or ""
+            s.set_output({"text": text})
+            usage = response.usage_metadata
+            if usage is not None:
+                s.set_usage(
+                    prompt_tokens=usage.prompt_token_count,
+                    completion_tokens=usage.candidates_token_count,
+                    total_tokens=usage.total_token_count,
+                )
 
-        usage = response.usage_metadata
-        if usage is not None:
-            span.set_usage(
-                prompt_tokens=usage.prompt_token_count,
-                completion_tokens=usage.candidates_token_count,
-                total_tokens=usage.total_token_count,
-            )
-
+    obsero.flush()
     print("reply:", text)
-    print("shipped event via obsero.trace")
+    print("shipped nested trace via obsero.trace/span")
 
 
 if __name__ == "__main__":
