@@ -15,5 +15,6 @@ Keep it short and in your own words. No polish required — clarity over vibes.
 
 ## Files
 
-- `sprint-01.md` — current sprint
-- Add `sprint-02.md`, etc. when the next sprint starts
+- `docs/devlog/sprint-01.md` — current sprint (OB-1 → OB-10)
+- `docs/devlog/sprint-02.md` — nested traces work (OB-11+)
+- Add `sprint-03.md`, etc. when the next sprint starts
