@@ -14,8 +14,14 @@ When you release, move that work into a versioned section and start a fresh `[Un
 - ADR 0003: keep flat `events` alongside traces/spans for now (OB-11)
 - `POST /v1/traces` nested ingest (client UUIDs, parent/cycle validation, atomic insert) (OB-12)
 - ADR 0004: nested ingest on `/v1/traces`, leave `/events/batch` alone (OB-12)
+- SDK `obsero.trace` / `obsero.span` with contextvars; flush to `POST /v1/traces` (OB-13)
+- `GET /v1/traces` (paginated + roll-ups) and `GET /v1/traces/{id}` (flat spans) (OB-14)
+- ADR 0005: trace detail returns flat spans; client builds the tree (OB-14)
+- Dashboard trace list + nested detail view; events section retained (OB-15)
 
 ### Changed
+
+- SDK: nested `trace`/`span` replace the old single-call `trace` CM (use `track()` for flat events) (OB-13)
 
 ### Fixed
 
