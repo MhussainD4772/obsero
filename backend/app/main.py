@@ -1,14 +1,17 @@
-"""Obsero FastAPI app — health, events, nested trace ingest.
+"""Obsero FastAPI app — health, events, nested trace ingest + query.
 
 Schema is owned by Alembic (see migrations/). This module only checks
 DB connectivity on startup and exposes HTTP endpoints.
 """
 
 from contextlib import asynccontextmanager
+from datetime import datetime
+from decimal import Decimal
+from uuid import UUID
 
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import select, text
+from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import engine, get_db
@@ -18,7 +21,11 @@ from app.schemas import (
     EventCreate,
     EventRead,
     SpanCreate,
+    SpanRead,
+    TraceDetail,
     TraceIngest,
+    TraceListItem,
+    TraceListResponse,
     TraceRead,
 )
 
@@ -125,11 +132,20 @@ def _spans_in_parent_order(spans: list[SpanCreate]) -> list[SpanCreate]:
             if by_id[sid].parent_span_id is None
             or by_id[sid].parent_span_id not in remaining
         ]
-        # Tree already validated — ready is never empty unless cycle (shouldn't happen)
         for sid in ready:
             ordered.append(by_id[sid])
             remaining.remove(sid)
     return ordered
+
+
+def _duration_ms(
+    start: datetime | None,
+    end: datetime | None,
+    latency_sum: int | None,
+) -> int | None:
+    if start is not None and end is not None:
+        return max(0, int((end - start).total_seconds() * 1000))
+    return latency_sum
 
 
 @app.post("/v1/traces", response_model=TraceRead, status_code=201)
@@ -139,8 +155,7 @@ async def create_trace(
 ):
     """Ingest one trace + nested spans atomically (ADR 0004)."""
     t = body.trace
-    # Client-supplied id — SDK builds parent links before the POST lands
-    trace = Trace(
+    trace_row = Trace(
         id=t.id,
         name=t.name,
         status=t.status,
@@ -148,7 +163,7 @@ async def create_trace(
         end_time=t.end_time,
         meta=t.metadata,
     )
-    db.add(trace)
+    db.add(trace_row)
 
     for s in _spans_in_parent_order(body.spans):
         db.add(
@@ -172,7 +187,92 @@ async def create_trace(
             )
         )
 
-    # One commit = all-or-nothing (session rolls back on exception)
     await db.commit()
-    await db.refresh(trace)
-    return TraceRead.from_orm_trace(trace, span_count=len(body.spans))
+    await db.refresh(trace_row)
+    return TraceRead.from_orm_trace(trace_row, span_count=len(body.spans))
+
+
+@app.get("/v1/traces", response_model=TraceListResponse)
+async def list_traces(
+    db: AsyncSession = Depends(get_db),
+    limit: int = Query(default=20, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+):
+    """Paginated traces, newest first, with span roll-ups (one aggregating query)."""
+    total = await db.scalar(select(func.count()).select_from(Trace)) or 0
+
+    # LEFT JOIN + GROUP BY → no N+1 (one round-trip for the page)
+    agg = (
+        select(
+            Trace.id,
+            Trace.name,
+            Trace.status,
+            Trace.start_time,
+            Trace.end_time,
+            Trace.created_at,
+            func.count(Span.id).label("span_count"),
+            func.coalesce(func.sum(Span.total_tokens), 0).label("total_tokens"),
+            func.sum(Span.cost_usd).label("total_cost_usd"),
+            func.coalesce(func.sum(Span.latency_ms), 0).label("latency_sum"),
+        )
+        .outerjoin(Span, Span.trace_id == Trace.id)
+        .group_by(Trace.id)
+        .order_by(Trace.created_at.desc())
+        .limit(limit)
+        .offset(offset)
+    )
+    rows = (await db.execute(agg)).all()
+
+    items = [
+        TraceListItem(
+            id=r.id,
+            name=r.name,
+            status=r.status,
+            start_time=r.start_time,
+            end_time=r.end_time,
+            created_at=r.created_at,
+            span_count=int(r.span_count),
+            total_tokens=int(r.total_tokens) if r.total_tokens is not None else None,
+            total_cost_usd=r.total_cost_usd,
+            duration_ms=_duration_ms(r.start_time, r.end_time, int(r.latency_sum)),
+        )
+        for r in rows
+    ]
+    return TraceListResponse(items=items, total=int(total), limit=limit, offset=offset)
+
+
+@app.get("/v1/traces/{trace_id}", response_model=TraceDetail)
+async def get_trace(
+    trace_id: UUID,
+    db: AsyncSession = Depends(get_db),
+):
+    """Trace + flat span list (ADR 0005)."""
+    result = await db.execute(select(Trace).where(Trace.id == trace_id))
+    trace_row = result.scalar_one_or_none()
+    if trace_row is None:
+        raise HTTPException(status_code=404, detail="trace not found")
+
+    spans_result = await db.execute(
+        select(Span).where(Span.trace_id == trace_id).order_by(Span.start_time.asc())
+    )
+    spans = list(spans_result.scalars().all())
+
+    token_sum = sum(s.total_tokens or 0 for s in spans) or None
+    cost_vals = [s.cost_usd for s in spans if s.cost_usd is not None]
+    cost_sum: Decimal | None = sum(cost_vals, Decimal("0")) if cost_vals else None
+    latency_sum = sum(s.latency_ms or 0 for s in spans) or None
+
+    return TraceDetail(
+        id=trace_row.id,
+        name=trace_row.name,
+        status=trace_row.status,
+        start_time=trace_row.start_time,
+        end_time=trace_row.end_time,
+        metadata=trace_row.meta,
+        created_at=trace_row.created_at,
+        span_count=len(spans),
+        total_tokens=token_sum,
+        total_cost_usd=cost_sum,
+        duration_ms=_duration_ms(trace_row.start_time, trace_row.end_time, latency_sum),
+        spans=[SpanRead.model_validate(s) for s in spans],
+    )
